@@ -4,6 +4,7 @@ import '../theme/app_text_styles.dart';
 import '../models/scam.dart';
 import '../services/firestore_service.dart';
 import 'recovery_screen.dart';
+import 'knowledge_center_screen.dart';
 
 /// Home Screen — Scam Feed (PRD Chapter 8.1 + Chapter 10.1)
 class HomeScreen extends StatefulWidget {
@@ -308,7 +309,12 @@ class _BottomNav extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: 0,
       onTap: (i) {
-        if (i != 0) {
+        if (i == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const KnowledgeCenterScreen()),
+          );
+        } else if (i != 0) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Coming soon')),
           );
