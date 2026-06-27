@@ -43,8 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 20),
               _EmergencyButton(),
               const SizedBox(height: 24),
-              Text('Latest Scam Feed', style: AppTextStyles.h3),
-              const SizedBox(height: 12),
               FutureBuilder<List<Scam>>(
                 future: _scamsFuture,
                 builder: (context, snapshot) {
@@ -75,13 +73,28 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   }
+                  final scamOfTheDay = scams[
+                      (DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60 * 24)) %
+                          scams.length];
                   return Column(
-                    children: scams
-                        .map((scam) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _ScamCard(scam: scam),
-                            ))
-                        .toList(),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text('🔥 ', style: TextStyle(fontSize: 18)),
+                          Text('Scam of the Day', style: AppTextStyles.h3),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _ScamCard(scam: scamOfTheDay),
+                      const SizedBox(height: 24),
+                      Text('Latest Scam Feed', style: AppTextStyles.h3),
+                      const SizedBox(height: 12),
+                      ...scams.map((scam) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _ScamCard(scam: scam),
+                          )),
+                    ],
                   );
                 },
               ),
