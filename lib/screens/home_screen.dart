@@ -84,54 +84,119 @@ class _EmergencyButton extends StatelessWidget {
   }
 }
 
-class _ScamCard extends StatelessWidget {
+class _ScamCard extends StatefulWidget {
   final Scam scam;
   const _ScamCard({required this.scam});
 
   @override
+  State<_ScamCard> createState() => _ScamCardState();
+}
+
+class _ScamCardState extends State<_ScamCard> {
+  bool isSaved = false;
+
+  @override
   Widget build(BuildContext context) {
+    final scam = widget.scam;
     final riskColor = AppColors.riskColor(scam.riskLevel);
+
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(scam.title, style: AppTextStyles.cardTitle)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ---- Image header (Instagram-post style) ----
+          Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 10,
+                child: Image.network(
+                  scam.imageUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return Container(
+                      color: AppColors.bgMuted,
+                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    );
+                  },
+                  errorBuilder: (context, error, stack) => Container(
+                    color: AppColors.bgMuted,
+                    child: Icon(Icons.image_not_supported_outlined, color: AppColors.textFaint),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 10,
+                left: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: riskColor.withOpacity(0.12),
+                    color: riskColor,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     scam.riskLevel,
-                    style: AppTextStyles.label.copyWith(color: riskColor),
+                    style: AppTextStyles.label.copyWith(color: Colors.white),
                   ),
+                ),
+              ),
+            ],
+          ),
+
+          // ---- Content ----
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(scam.category, style: AppTextStyles.label.copyWith(color: AppColors.brand)),
+                const SizedBox(height: 4),
+                Text(scam.title, style: AppTextStyles.cardTitle),
+                const SizedBox(height: 8),
+                Text(
+                  scam.description,
+                  style: AppTextStyles.bodyMuted,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
-            const SizedBox(height: 6),
-            Text(scam.category, style: AppTextStyles.label),
-            const SizedBox(height: 10),
-            Text(
-              scam.description,
-              style: AppTextStyles.bodyMuted,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+          ),
+
+          // ---- Action row (like/save/share — social-post style) ----
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 16, 8),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.thumb_up_outlined, size: 21),
+                  color: AppColors.textFaint,
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share_outlined, size: 21),
+                  color: AppColors.textFaint,
+                  onPressed: () {},
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(
+                    isSaved ? Icons.bookmark : Icons.bookmark_border,
+                    size: 21,
+                  ),
+                  color: isSaved ? AppColors.brand : AppColors.textFaint,
+                  onPressed: () => setState(() => isSaved = !isSaved),
+                ),
+                TextButton(
+                  onPressed: () => _showDetail(context, scam),
+                  child: Text('Learn More',
+                      style: AppTextStyles.cardTitle.copyWith(color: AppColors.brand)),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => _showDetail(context, scam),
-                child: Text('Learn More', style: AppTextStyles.cardTitle.copyWith(color: AppColors.brand)),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
