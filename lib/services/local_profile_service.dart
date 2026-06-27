@@ -8,6 +8,7 @@ class LocalProfileService {
   static const _kFamilyCode = 'family_code';
   static const _kFamilyRole = 'family_role';
   static const _kCompletedLessons = 'completed_lessons';
+  static const _kReadNotifications = 'read_notifications';
 
   static Future<void> saveProfile({required String name, required String userType}) async {
     final prefs = await SharedPreferences.getInstance();
@@ -46,5 +47,17 @@ class LocalProfileService {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_kCompletedLessons) ?? [];
     return list.map((s) => int.parse(s)).toSet();
+  }
+
+  static Future<Set<String>> getReadNotificationIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_kReadNotifications) ?? []).toSet();
+  }
+
+  static Future<void> markNotificationRead(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final current = (prefs.getStringList(_kReadNotifications) ?? []).toSet();
+    current.add(id);
+    await prefs.setStringList(_kReadNotifications, current.toList());
   }
 }
