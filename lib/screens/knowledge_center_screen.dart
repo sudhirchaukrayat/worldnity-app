@@ -97,7 +97,7 @@ class _KnowledgeCenterScreenState extends State<KnowledgeCenterScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 1.3,
+                    childAspectRatio: 0.95,
                     children: _categories.map((cat) {
                       final count = allScams.where((s) => s.category == cat.name).length;
                       return _CategoryCard(
@@ -152,7 +152,7 @@ class _CategoryCard extends StatelessWidget {
                 child: Icon(def.icon, color: AppColors.brand, size: 22),
               ),
               const Spacer(),
-              Text(def.name, style: AppTextStyles.cardTitle, maxLines: 2),
+              Text(def.name, style: AppTextStyles.cardTitle.copyWith(fontSize: 15), maxLines: 2),
               const SizedBox(height: 2),
               Text('$count article${count == 1 ? '' : 's'}', style: AppTextStyles.label),
             ],
