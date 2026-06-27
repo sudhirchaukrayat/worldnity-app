@@ -76,4 +76,67 @@ class FirestoreService {
       throw Exception('Failed to submit report (status ${response.statusCode})');
     }
   }
+
+  /// Family system — PRD Chapter 8.3 + 6.2/6.3 (V1 simplified version)
+  /// Each family is a Firestore document keyed by a short shareable code,
+  /// with members stored as a subcollection.
+  static Future<bool> familyExists(String code) async {
+    final response = await http.get(Uri.parse('$_baseUrl/families/$code'));
+    return response.statusCode == 200;
+  }
+
+  static Future<void> createFamily(String code) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/families?documentId=$code'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'fields': {
+          'createdAt': {'timestampValue': DateTime.now().toUtc().toIso8601String()},
+        }
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to create family (status ${response.statusCode})');
+    }
+  }
+
+  static Future<void> addFamilyMember({
+    required String familyCode,
+    required String name,
+    required String userType,
+    required String role,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/families/$familyCode/members'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'fields': {
+          'name': {'stringValue': name},
+          'userType': {'stringValue': userType},
+          'role': {'stringValue': role},
+          'joinedAt': {'timestampValue': DateTime.now().toUtc().toIso8601String()},
+        }
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add family member (status ${response.statusCode})');
+    }
+  }
+
+  static Future<List<Map<String, String>>> fetchFamilyMembers(String familyCode) async {
+    final response = await http.get(Uri.parse('$_baseUrl/families/$familyCode/members'));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load family members (status ${response.statusCode})');
+    }
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final documents = (data['documents'] as List?) ?? [];
+    return documents.map((doc) {
+      final fields = doc['fields'] as Map<String, dynamic>;
+      return {
+        'name': _str(fields, 'name'),
+        'userType': _str(fields, 'userType'),
+        'role': _str(fields, 'role'),
+      };
+    }).toList();
+  }
 }
