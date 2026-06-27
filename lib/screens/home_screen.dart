@@ -8,6 +8,7 @@ import 'knowledge_center_screen.dart';
 import 'report_screen.dart';
 import 'family_screen.dart';
 import 'profile_screen.dart';
+import 'alerts_screen.dart';
 
 /// Home Screen — Scam Feed (PRD Chapter 8.1 + Chapter 10.1)
 class HomeScreen extends StatefulWidget {
@@ -145,7 +146,12 @@ class _Header extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AlertsScreen()),
+            );
+          },
           icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
         ),
       ],
@@ -348,6 +354,11 @@ class _BottomNav extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const KnowledgeCenterScreen()),
+          );
+        } else if (i == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AlertsScreen()),
           );
         } else if (i == 3) {
           Navigator.push(
