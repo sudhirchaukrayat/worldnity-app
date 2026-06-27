@@ -169,4 +169,41 @@ class FirestoreService {
     items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return items;
   }
+
+  /// Consultation Booking — PRD Chapter 8.6 (₹199 per consultation, V1 pricing)
+  static Future<void> submitConsultationBooking({
+    required String consultationType,
+    required String fraudType,
+    required String description,
+    required String timeSlot,
+    required String name,
+    required String contact,
+    String? email,
+    required String paymentId,
+    required int amountPaise,
+  }) async {
+    final fields = {
+      'consultationType': {'stringValue': consultationType},
+      'fraudType': {'stringValue': fraudType},
+      'description': {'stringValue': description},
+      'timeSlot': {'stringValue': timeSlot},
+      'name': {'stringValue': name},
+      'contact': {'stringValue': contact},
+      'email': {'stringValue': email ?? ''},
+      'paymentId': {'stringValue': paymentId},
+      'amountPaise': {'integerValue': amountPaise.toString()},
+      'status': {'stringValue': 'confirmed'},
+      'createdAt': {'timestampValue': DateTime.now().toUtc().toIso8601String()},
+    };
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/consultations'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'fields': fields}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to save booking (status ${response.statusCode})');
+    }
+  }
 }
