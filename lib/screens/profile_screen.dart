@@ -3,6 +3,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../services/local_profile_service.dart';
 import '../models/lesson.dart';
+import '../services/auth_service.dart';
+import 'auth_screen.dart';
 
 /// Profile Screen — shows current profile + family info, allows editing.
 class ProfileScreen extends StatefulWidget {
@@ -125,10 +127,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text(
-              'Profile abhi set nahi hai. "Family" tab se profile create karein.',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMuted,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Profile abhi set nahi hai. "Family" tab se profile create karein.',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodyMuted,
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await AuthService.signOut();
+                    if (!context.mounted) return;
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AuthScreen()),
+                      (route) => false,
+                    );
+                  },
+                  icon: Icon(Icons.logout, size: 18, color: AppColors.error),
+                  label: Text('Log Out', style: AppTextStyles.cardTitle.copyWith(color: AppColors.error)),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.error.withOpacity(0.3)),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -185,6 +209,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.shield_outlined,
               title: 'Wordnity CyberGuard',
               subtitle: 'Version 1.0.0',
+            ),
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      title: Text('Log Out?', style: AppTextStyles.h4),
+                      content: Text('Aap apne account se log out ho jayenge.', style: AppTextStyles.body),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text('Cancel', style: AppTextStyles.body),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text('Log Out', style: AppTextStyles.cardTitle.copyWith(color: AppColors.error)),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    await AuthService.signOut();
+                    if (!context.mounted) return;
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AuthScreen()),
+                      (route) => false,
+                    );
+                  }
+                },
+                icon: Icon(Icons.logout, size: 18, color: AppColors.error),
+                label: Text('Log Out', style: AppTextStyles.cardTitle.copyWith(color: AppColors.error)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: BorderSide(color: AppColors.error.withOpacity(0.3)),
+                ),
+              ),
             ),
           ],
         ),
