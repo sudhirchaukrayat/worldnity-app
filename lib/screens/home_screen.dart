@@ -2,29 +2,89 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../models/scam.dart';
+import '../services/firestore_service.dart';
 
 /// Home Screen — Scam Feed (PRD Chapter 8.1 + Chapter 10.1)
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<Scam>> _scamsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _scamsFuture = FirestoreService.fetchScams();
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _scamsFuture = FirestoreService.fetchScams();
+    });
+    await _scamsFuture;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _Header(),
-            const SizedBox(height: 20),
-            _EmergencyButton(),
-            const SizedBox(height: 24),
-            Text('Latest Scam Feed', style: AppTextStyles.h3),
-            const SizedBox(height: 12),
-            ...dummyScams.map((scam) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _ScamCard(scam: scam),
-                )),
-          ],
+        child: RefreshIndicator(
+          onRefresh: _refresh,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _Header(),
+              const SizedBox(height: 20),
+              _EmergencyButton(),
+              const SizedBox(height: 24),
+              Text('Latest Scam Feed', style: AppTextStyles.h3),
+              const SizedBox(height: 12),
+              FutureBuilder<List<Scam>>(
+                future: _scamsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          'Kuch gadbad ho gayi.\nNeeche kheech ke phir try karo.',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodyMuted,
+                        ),
+                      ),
+                    );
+                  }
+                  final scams = snapshot.data ?? [];
+                  if (scams.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text('Abhi koi scam entry nahi hai.', style: AppTextStyles.bodyMuted),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: scams
+                        .map((scam) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _ScamCard(scam: scam),
+                            ))
+                        .toList(),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: _BottomNav(),
