@@ -5,6 +5,7 @@ import '../models/scam.dart';
 import '../services/firestore_service.dart';
 import 'recovery_screen.dart';
 import 'knowledge_center_screen.dart';
+import 'report_screen.dart';
 
 /// Home Screen — Scam Feed (PRD Chapter 8.1 + Chapter 10.1)
 class HomeScreen extends StatefulWidget {
@@ -42,6 +43,25 @@ class _HomeScreenState extends State<HomeScreen> {
               _Header(),
               const SizedBox(height: 20),
               _EmergencyButton(),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ReportScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.flag_outlined, size: 18),
+                  label: Text('Suspicious Scam Dekha? Report Karein', style: AppTextStyles.cardTitle),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(color: AppColors.bgMuted),
+                    foregroundColor: AppColors.textPrimary,
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
               FutureBuilder<List<Scam>>(
                 future: _scamsFuture,
