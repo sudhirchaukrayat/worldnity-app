@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../models/lesson.dart';
+import '../services/local_profile_service.dart';
 
 /// Cyber Safety Lessons — PRD V1 Feature 6
 class LessonsScreen extends StatefulWidget {
@@ -12,8 +13,31 @@ class LessonsScreen extends StatefulWidget {
 }
 
 class _LessonsScreenState extends State<LessonsScreen> {
-  final Set<int> _completed = {};
+  Set<int> _completed = {};
   int? _expandedIndex;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    LocalProfileService.getCompletedLessons().then((value) {
+      setState(() {
+        _completed = value;
+        _loaded = true;
+      });
+    });
+  }
+
+  void _toggleComplete(int i) {
+    setState(() {
+      if (_completed.contains(i)) {
+        _completed.remove(i);
+      } else {
+        _completed.add(i);
+      }
+    });
+    LocalProfileService.setCompletedLessons(_completed);
+  }
 
   IconData _iconFor(String key) {
     switch (key) {
@@ -40,6 +64,12 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_loaded) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Cyber Safety Lessons', style: AppTextStyles.h3)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
     final progress = _completed.length / lessons.length;
 
     return Scaffold(
@@ -116,13 +146,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                             SizedBox(
                               width: double.infinity,
                               child: OutlinedButton.icon(
-                                onPressed: () => setState(() {
-                                  if (isDone) {
-                                    _completed.remove(i);
-                                  } else {
-                                    _completed.add(i);
-                                  }
-                                }),
+                                onPressed: () => _toggleComplete(i),
                                 icon: Icon(
                                   isDone ? Icons.check_circle : Icons.check_circle_outline,
                                   size: 18,
