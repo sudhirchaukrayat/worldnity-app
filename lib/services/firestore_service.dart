@@ -44,4 +44,36 @@ class FirestoreService {
     if (arr == null) return [];
     return arr.map((v) => v['stringValue'] as String? ?? '').toList();
   }
+
+  /// Submit a community scam report (PRD Chapter 8.9 — V1 simplified version).
+  /// Report goes to "reports" collection with status "pending" for moderator review.
+  static Future<void> submitReport({
+    required String category,
+    required String description,
+    required String date,
+    String? state,
+    String? city,
+    String? evidence,
+  }) async {
+    final fields = {
+      'category': {'stringValue': category},
+      'description': {'stringValue': description},
+      'date': {'stringValue': date},
+      'state': {'stringValue': state ?? ''},
+      'city': {'stringValue': city ?? ''},
+      'evidence': {'stringValue': evidence ?? ''},
+      'status': {'stringValue': 'pending'},
+      'submittedAt': {'timestampValue': DateTime.now().toUtc().toIso8601String()},
+    };
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/reports'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'fields': fields}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to submit report (status ${response.statusCode})');
+    }
+  }
 }
