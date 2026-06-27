@@ -3,6 +3,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../models/scam.dart';
 import '../services/firestore_service.dart';
+import 'recovery_screen.dart';
 
 /// Home Screen — Scam Feed (PRD Chapter 8.1 + Chapter 10.1)
 class HomeScreen extends StatefulWidget {
@@ -123,8 +124,9 @@ class _EmergencyButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Recovery Center — coming next')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const RecoveryScreen()),
           );
         },
         style: ElevatedButton.styleFrom(
