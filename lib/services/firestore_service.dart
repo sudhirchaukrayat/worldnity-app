@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/scam.dart';
+import '../models/notification_item.dart';
 
 /// Fetches Scam Feed data directly from Firestore via REST API.
 /// No Firebase SDK / login / google-services.json needed — works as long as
@@ -138,5 +139,34 @@ class FirestoreService {
         'role': _str(fields, 'role'),
       };
     }).toList();
+  }
+
+  /// Notifications & Alerts — PRD Chapter 19.5 (V1: in-app feed)
+  /// Admin adds entries via Firebase Console "notifications" collection.
+  static Future<List<NotificationItem>> fetchNotifications() async {
+    final response = await http.get(Uri.parse('$_baseUrl/notifications'));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load notifications (status ${response.statusCode})');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final documents = (data['documents'] as List?) ?? [];
+
+    final items = documents.map((doc) {
+      final fields = doc['fields'] as Map<String, dynamic>;
+      final name = doc['name'] as String;
+      final id = name.split('/').last;
+      final createdAtStr = fields['createdAt']?['timestampValue'] as String?;
+      return NotificationItem(
+        id: id,
+        title: _str(fields, 'title'),
+        body: _str(fields, 'body'),
+        category: _str(fields, 'category'),
+        createdAt: createdAtStr != null ? DateTime.parse(createdAtStr) : DateTime.now(),
+      );
+    }).toList();
+
+    items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return items;
   }
 }
