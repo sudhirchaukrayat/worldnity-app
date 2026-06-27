@@ -3,6 +3,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../models/scam.dart';
 import '../services/firestore_service.dart';
+import 'lessons_screen.dart';
 
 /// Scam Knowledge Center — PRD Chapter 8.4
 /// Reuses Scam Feed data (Firestore), organized by category with search.
@@ -74,6 +75,40 @@ class _KnowledgeCenterScreenState extends State<KnowledgeCenterScreen> {
                     ),
                   ),
                   onChanged: (value) => setState(() => _searchQuery = value),
+                ),
+                const SizedBox(height: 16),
+
+                InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LessonsScreen()),
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.brand,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.school_outlined, color: Colors.white),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Cyber Safety Lessons',
+                                  style: AppTextStyles.cardTitle.copyWith(color: Colors.white)),
+                              Text('Quick short lessons, track your progress',
+                                  style: AppTextStyles.label.copyWith(color: Colors.white70)),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, color: Colors.white),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
 
