@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../models/recovery_guide.dart';
+import 'consultation_screen.dart';
 
 /// Fraud Recovery Center — PRD Chapter 8.2
 /// Entry screen: select fraud type → view structured recovery guidance.
@@ -148,8 +149,11 @@ class RecoveryDetailScreen extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Consultation Booking — coming soon')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ConsultationScreen(initialFraudType: guide.fraudType),
+                    ),
                   );
                 },
                 style: OutlinedButton.styleFrom(
